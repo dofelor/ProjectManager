@@ -19,14 +19,13 @@ namespace ProjectManager.Logic.Services
         {
             var query = _context.Projects
                 .Include(p => p.Supervisor)
+                .Include(p => p.Employees)
                 .AsQueryable();
 
-            // 1. Фильтрация
             if (priority.HasValue) query = query.Where(p => p.Priority == priority.Value);
             if (from.HasValue) query = query.Where(p => p.StartDate >= from.Value);
             if (to.HasValue) query = query.Where(p => p.StartDate <= to.Value);
 
-            // 2. Сортировка
             query = sortBy switch
             {
                 "Name" => query.OrderBy(p => p.Name),
@@ -35,7 +34,6 @@ namespace ProjectManager.Logic.Services
                 _ => query.OrderByDescending(p => p.Id)
             };
 
-            // 3. Маппинг в DTO
             return await query.Select(p => new ProjectDTO
             {
                 Id = p.Id,
@@ -46,9 +44,21 @@ namespace ProjectManager.Logic.Services
                 EndDate = p.EndDate,
                 Priority = p.Priority,
                 SupervisorId = p.SupervisorId,
+
+                // ВАЖНО: Маппинг UserId руководителя (из таблицы AspNetUsers через сущность Employee)
+                SupervisorUserId = p.Supervisor != null ? p.Supervisor.UserId : null,
+
                 SupervisorFullName = p.Supervisor != null
                     ? $"{p.Supervisor.LastName} {p.Supervisor.FirstName}"
-                    : "Нет руководителя"
+                    : "Нет руководителя",
+
+                Employees = p.Employees.Select(e => new EmployeeDTO
+                {
+                    Id = e.Id,
+                    FirstName = e.FirstName,
+                    LastName = e.LastName,
+                    UserId = e.UserId
+                }).ToList()
             }).ToListAsync();
         }
 
@@ -165,15 +175,25 @@ namespace ProjectManager.Logic.Services
                 EndDate = p.EndDate,
                 Priority = p.Priority,
                 SupervisorId = p.SupervisorId,
+
+                // ВАЖНО: Добавляем UserId сюда для корректной работы Details.cshtml
+                SupervisorUserId = p.Supervisor != null ? p.Supervisor.UserId : null,
+
+                SupervisorFullName = p.Supervisor != null
+                    ? $"{p.Supervisor.LastName} {p.Supervisor.FirstName}"
+                    : "Нет руководителя",
+
                 Employees = p.Employees.Select(e => new EmployeeDTO
                 {
                     Id = e.Id,
                     FirstName = e.FirstName,
-                    LastName = e.LastName
+                    LastName = e.LastName,
+                    UserId = e.UserId
                 }).ToList()
             };
         }
-           
+        
+
 
 
         // Добавь в ProjectService.cs

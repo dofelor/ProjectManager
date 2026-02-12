@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Создать задачу";
 }
-
+<div asp-validation-summary="All" class="text-danger"></div>
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
@@ -12,6 +12,7 @@
         <div class="card-body">
             <form asp-action="Create" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
 
                 <div class="row">
                     <div class="col-md-12 mb-3">

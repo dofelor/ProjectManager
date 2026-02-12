@@ -2,34 +2,61 @@
 
 @{
     ViewData["Title"] = "Сотрудники";
+    // Проверяем, является ли пользователь Администратором
+    bool isAdmin = User.IsInRole("Admin");
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Список сотрудников</h1>
-    <a asp-action="Create" class="btn btn-primary">Добавить сотрудника</a>
+    @* Кнопка создания видна только Админу *@
+    @if (isAdmin)
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Добавить сотрудника
+        </a>
+    }
 </div>
 
-<div class="table-responsive">
-    <table class="table table-striped table-hover">
+<div class="table-responsive border rounded shadow-sm">
+    <table class="table table-striped table-hover align-middle mb-0">
         <thead class="table-dark">
             <tr>
                 <th>ФИО</th>
                 <th>Email</th>
-                <th>Действия</th>
+                @if (isAdmin)
+                {
+                    <th class="text-end">Действия</th>
+                }
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.FullName</td>
+                    <td class="fw-bold">@item.FullName</td>
                     <td>@item.Email</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">Редактировать</a>
-                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('Удалить этого сотрудника?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
-                        </form>
-                    </td>
+                    @if (isAdmin)
+                    {
+                        <td class="text-end">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> Редактировать
+                            </a>
+
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Вы уверены, что хотите полностью удалить этого сотрудника и его учетную запись?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Удалить
+                                </button>
+                            </form>
+                        </td>
+                    }
                 </tr>
             }
         </tbody>
@@ -37,11 +64,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        function confirmDelete(button) {
-            if (confirm("Вы уверены, что хотите удалить этого сотрудника?")) {
-                $(button).closest('form').submit();
-            }
-        }
-    </script>
+    @* Скрипт confirmDelete больше не нужен, так как мы используем нативный onsubmit в форме *@
 }

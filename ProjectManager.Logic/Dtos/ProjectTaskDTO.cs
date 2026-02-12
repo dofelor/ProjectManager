@@ -22,6 +22,10 @@ namespace ProjectManager.Logic.Dtos
         // Исполнитель
         [Required(ErrorMessage = "Выберите исполнителя")]
         public int ExecutorId { get; set; }
+
+        public string? ExecutorUserId { get; set; }
+
+        
         public string? ExecutorFullName { get; set; }
 
         // Данные задачи

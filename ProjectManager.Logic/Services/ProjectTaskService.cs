@@ -39,6 +39,7 @@ namespace ProjectManager.Logic.Services
                 ProjectName = t.Project.Name,
                 AuthorFullName = t.Author.FirstName + " " + t.Author.LastName,
                 ExecutorFullName = t.Executor.FirstName + " " + t.Executor.LastName,
+                ExecutorUserId = t.Executor.UserId,
                 Status = (int)t.Status,
                 Priority = t.Priority,
                 Comment = t.Comment
@@ -65,6 +66,7 @@ namespace ProjectManager.Logic.Services
                 AuthorFullName = t.Author != null ? t.Author.FirstName + " " + t.Author.LastName : null,
                 ExecutorId = t.ExecutorId,
                 ExecutorFullName = t.Executor != null ? t.Executor.FirstName + " " + t.Executor.LastName : null,
+                ExecutorUserId = t.Executor?.UserId,
                 Status = (int)t.Status,
                 Priority = t.Priority,
                 Comment = t.Comment

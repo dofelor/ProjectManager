@@ -1,91 +1,149 @@
 ﻿@model ProjectManager.Logic.Dtos.ProjectDTO
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    ViewData["Title"] = "Детали проекта";
+    var currentUserId = UserManager.GetUserId(User);
+
+    // Определяем права доступа
+    bool isAdmin = User.IsInRole("Admin");
+
+    // ВАЖНО: Сравниваем SupervisorUserId из DTO с ID текущего пользователя
+    bool isProjectSupervisor = User.IsInRole("ProjectManager") &&
+                               !string.IsNullOrEmpty(Model.SupervisorUserId) &&
+                               Model.SupervisorUserId.Equals(currentUserId, System.StringComparison.OrdinalIgnoreCase);
+
+    // Может ли текущий пользователь редактировать проект и добавлять задачи?
+    bool canManageProject = isAdmin || isProjectSupervisor;
+}
 
 <div class="container mt-4">
-    <div class="card shadow mb-4">
-        <div class="card-header bg-dark text-white">
-            <h4 class="mb-0">Проект: @Model.Name</h4>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="alert alert-secondary">
+            Текущий пользователь: @currentUserId <br />
+            ID руководителя проекта: @Model.SupervisorUserId <br />
+            Это мой проект: @(Model.SupervisorUserId == currentUserId)
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Заказчик:</strong> @Model.CustomerCompany</p>
-                    <p><strong>Исполнитель:</strong> @Model.PerformingCompany</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Старт:</strong> @Model.StartDate?.ToShortDateString()</p>
-                    <p><strong>Финиш:</strong> @Model.EndDate?.ToShortDateString()</p>
-                    <p><strong>Приоритет:</strong> <span class="badge bg-primary">@Model.Priority</span></p>
-                </div>
-            </div>
+        <h1>Проект: @Model.Name</h1>
+        <div>
+            @if (canManageProject)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil"></i> Редактировать проект
+                </a>
+            }
+            <a asp-action="Index" class="btn btn-outline-secondary">Назад к списку</a>
         </div>
     </div>
 
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-action="Index">Все проекты</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
-        </ol>
-    </nav>
+    <div class="row">
+        @* Основная информация о проекте *@
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Информация</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Заказчик:</strong> @Model.CustomerCompany</p>
+                    <p><strong>Исполнитель:</strong> @Model.PerformingCompany</p>
+                    <p><strong>Руководитель:</strong> @Model.SupervisorFullName</p>
+                    <p><strong>Приоритет:</strong> <span class="badge bg-info text-dark">@Model.Priority</span></p>
+                    <p><strong>Начало:</strong> @Model.StartDate?.ToShortDateString()</p>
+                    <p><strong>Конец:</strong> @Model.EndDate?.ToShortDateString()</p>
+                </div>
+            </div>
 
-    @* Секция с задачами этого проекта *@
-    <div class="card shadow">
-    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Задачи проекта</h5>
-            <a asp-controller="Tasks" asp-action="Create" asp-route-projectId="@Model.Id" class="btn btn-sm btn-light">
-                <i class="bi bi-plus-lg"></i> Добавить задачу
-            </a>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Команда проекта</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        @foreach (var emp in Model.Employees)
+                        {
+                            <li><i class="bi bi-person"></i> @emp.LastName @emp.FirstName</li>
+                        }
+                    </ul>
+                </div>
+            </div>
         </div>
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Задача</th>
-                    <th>Исполнитель</th>
-                    <th>Статус</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var task in (IEnumerable<ProjectManager.Logic.Dtos.ProjectTaskDTO>)ViewBag.ProjectTasks)
-                {
-                    <tr>
-                        <td class="align-middle">@task.Name</td>
-                        <td class="align-middle">@task.ExecutorFullName</td>
-                        <td class="align-middle">
-                            @switch (task.Status)
+
+        @* Список задач *@
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Задачи проекта</h5>
+                    @if (canManageProject)
+                    {
+                        <a asp-controller="Tasks"
+                           asp-action="Create"
+                           asp-route-projectId="@Model.Id"
+                           class="btn btn-sm btn-success">
+                            <i class="bi bi-plus-lg"></i> Добавить задачу
+                        </a>
+                    }
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Название</th>
+                                <th>Исполнитель</th>
+                                <th>Статус</th>
+                                <th class="text-end">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.ProjectTasks != null)
                             {
-                                case 0: <span class="badge bg-info text-dark">ToDo</span> break;
-                                case 1: <span class="badge bg-warning text-dark">In Progress</span> break;
-                                case 2: <span class="badge bg-success">Done</span> break;
+                                foreach (var task in (IEnumerable<ProjectManager.Logic.Dtos.ProjectTaskDTO>)ViewBag.ProjectTasks)
+                                {
+                                    <tr>
+                                        <td>@task.Name</td>
+                                        <td>@task.ExecutorFullName</td>
+                                        <td>
+                                            @* Тут можно добавить разные цвета для статусов *@
+                                            <span class="badge bg-secondary">@task.Status</span>
+                                        </td>
+                                        <td class="text-end">
+                                            @* Логика доступа к редактированию задачи:
+                                               1. Админ или Менеджер этого проекта могут редактировать любую задачу.
+                                               2. Сотрудник может редактировать (менять статус) только если он исполнитель.
+                                            *@
+                                            @if (canManageProject || task.ExecutorUserId == currentUserId)
+                                            {
+                                                <a asp-controller="Tasks" asp-action="Edit" asp-route-id="@task.Id"
+                                                   asp-route-returnUrl="@Context.Request.Path"
+                                                   class="btn btn-sm btn-outline-warning">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            }
+
+                                            @if (canManageProject)
+                                            {
+                                                <form asp-controller="Tasks" asp-action="Delete" asp-route-id="@task.Id"
+                                                      asp-route-returnUrl="@Context.Request.Path" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                            onclick="return confirm('Удалить задачу?')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
                             }
-                        </td>
-                            <td class="align-middle text-end">
-                                <div class="btn-group btn-group-sm mr-2">
-                                    @* Добавляем параметр returnUrl, чтобы Edit знал, куда возвращать *@
-                                    <a asp-controller="Tasks" asp-action="Edit" asp-route-id="@task.Id"
-                                       asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString"
-                                       class="btn btn-outline-primary">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-
-                                    @* Добавляем параметр returnUrl, чтобы кнопка "Назад" в Details сработала верно *@
-                                    <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id"
-                                       asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString"
-                                       class="btn btn-outline-info">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-
-                                    <form asp-controller="Tasks" asp-action="Delete" asp-route-id="@task.Id" method="post">
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                                        <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Удалить?')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted p-4">Задач пока нет</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

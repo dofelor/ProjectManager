@@ -2,4 +2,5 @@
   <Project Path="ProjectManager.Data/ProjectManager.Data.csproj" />
   <Project Path="ProjectManager.Logic/ProjectManager.Logic.csproj" />
   <Project Path="ProjectManager.Web/ProjectManager.Web.csproj" />
+  <Project Path="Tests/ProjectManager.Tests.csproj" Id="eb866191-5b4e-44f6-bb9b-8c6e4f646638" />
 </Solution>

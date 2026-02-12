@@ -1,43 +1,56 @@
-﻿@model ProjectManager.Logic.Dtos.EmployeeDTO
+﻿@model ProjectManager.Web.Models.CreateEmployeeViewModel
 
 @{
     ViewData["Title"] = "Добавить сотрудника";
 }
 
 <h2>Добавить нового сотрудника</h2>
+<p class="text-muted">При создании будет автоматически сгенерирован аккаунт для входа.</p>
 <hr />
 
 <div class="row">
     <div class="col-md-6">
         <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @* Общие ошибки (например, если такой Email уже есть) *@
+            <div asp-validation-summary="All" class="text-danger"></div>
 
             <div class="mb-3">
                 <label asp-for="LastName" class="form-label">Фамилия</label>
-                <input asp-for="LastName" class="form-control" />
+                <input asp-for="LastName" class="form-control" placeholder="Иванов" />
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="FirstName" class="form-label">Имя</label>
-                <input asp-for="FirstName" class="form-control" />
+                <input asp-for="FirstName" class="form-control" placeholder="Иван" />
                 <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="MiddleName" class="form-label">Отчество</label>
-                <input asp-for="MiddleName" class="form-control" />
-                <span asp-validation-for="MiddleName" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">Email</label>
-                <input asp-for="Email" class="form-control" />
+                <label asp-for="Email" class="form-label">Email (Логин)</label>
+                <input asp-for="Email" class="form-control" placeholder="example@mail.com" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Временный пароль</label>
+                <input asp-for="Password" type="password" class="form-control" />
+                <small class="form-text text-muted">Минимум 6 символов, заглавная буква и цифра.</small>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Role" class="form-label">Роль в системе</label>
+                <select asp-for="Role" class="form-select">
+                    <option value="Employee">Исполнитель (Employee)</option>
+                    <option value="ProjectManager">Менеджер проекта (ProjectManager)</option>
+                    <option value="Admin">Администратор (Admin)</option>
+                </select>
+                <span asp-validation-for="Role" class="text-danger"></span>
+            </div>
+
             <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Сохранить</button>
+                <button type="submit" class="btn btn-primary">Создать сотрудника и аккаунт</button>
                 <a asp-action="Index" class="btn btn-secondary">Отмена</a>
             </div>
         </form>

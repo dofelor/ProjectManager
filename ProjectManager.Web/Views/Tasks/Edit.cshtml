@@ -2,85 +2,95 @@
 
 @{
     ViewData["Title"] = "Редактирование задачи";
+    // Сотрудник может только менять статус.
+    // Админ и Проджект-менеджер (этого проекта) могут менять всё.
+    bool isEmployee = User.IsInRole("Employee");
 }
 
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb p-2 bg-light rounded">
-                    <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Проекты</a></li>
-                    <li class="breadcrumb-item">
-                        <a asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">@Model.ProjectName</a>
-                    </li>
-                    <li class="breadcrumb-item active">@Model.Name</li>
-                </ol>
-            </nav>
-            <h4 class="mb-0">Редактирования задачи</h4>
+            <h4 class="mb-0">Редактирование задачи</h4>
         </div>
         <div class="card-body">
             <form asp-action="Edit" method="post">
                 <input type="hidden" asp-for="Id" />
+                @* Сохраняем returnUrl, чтобы вернуться туда, откуда пришли (например, из деталей проекта) *@
                 <input type="hidden" name="returnUrl" value="@ViewContext.HttpContext.Request.Query["returnUrl"]" />
+
+                @* Защита данных: если поля заблокированы (disabled), передаем их через hidden *@
+                @if (isEmployee)
+                {
+                    <input type="hidden" asp-for="Name" />
+                    <input type="hidden" asp-for="ProjectId" />
+                    <input type="hidden" asp-for="Priority" />
+                    <input type="hidden" asp-for="AuthorId" />
+                    <input type="hidden" asp-for="ExecutorId" />
+                    @* Если комментарий тоже нельзя менять сотруднику: *@
+                    <input type="hidden" asp-for="Comment" />
+                }
+
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="row">
+                    @* Название *@
                     <div class="col-md-12 mb-3">
                         <label asp-for="Name" class="form-label">Название задачи</label>
-                        <input asp-for="Name" class="form-control" placeholder="Введите краткое название" />
+                        <input asp-for="Name" class="form-control" readonly="@isEmployee" />
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
 
+                    @* Проект *@
                     <div class="col-md-6 mb-3">
                         <label asp-for="ProjectId" class="form-label">Проект</label>
-                        <select asp-for="ProjectId" class="form-select" asp-items="ViewBag.ProjectId">
+                        <select asp-for="ProjectId" class="form-select" asp-items="ViewBag.ProjectId" disabled="@isEmployee">
                             <option value="">-- Выберите проект --</option>
                         </select>
-                        <span asp-validation-for="ProjectId" class="text-danger"></span>
                     </div>
 
+                    @* Приоритет *@
                     <div class="col-md-6 mb-3">
-                        <label asp-for="Priority" class="form-label">Приоритет (целое число)</label>
-                        <input asp-for="Priority" type="number" class="form-control" />
-                        <span asp-validation-for="Priority" class="text-danger"></span>
+                        <label asp-for="Priority" class="form-label">Приоритет</label>
+                        <input asp-for="Priority" type="number" class="form-control" readonly="@isEmployee" />
                     </div>
 
+                    @* Автор *@
                     <div class="col-md-6 mb-3">
-                        <label asp-for="AuthorId" class="form-label">Автор (кто поставил)</label>
-                        <select asp-for="AuthorId" class="form-select" asp-items="ViewBag.AuthorId">
-                            <option value="">-- Выберите автора --</option>
+                        <label asp-for="AuthorId" class="form-label">Автор</label>
+                        <select asp-for="AuthorId" class="form-select" asp-items="ViewBag.AuthorId" disabled="@isEmployee">
                         </select>
                     </div>
 
+                    @* Исполнитель *@
                     <div class="col-md-6 mb-3">
                         <label asp-for="ExecutorId" class="form-label">Исполнитель</label>
-                        <select asp-for="ExecutorId" class="form-select" asp-items="ViewBag.ExecutorId">
-                            <option value="">-- Выберите исполнителя --</option>
+                        <select asp-for="ExecutorId" class="form-select" asp-items="ViewBag.ExecutorId" disabled="@isEmployee">
                         </select>
                     </div>
 
+                    @* СТАТУС - доступен всем *@
                     <div class="col-md-6 mb-3">
-                        <label asp-for="Status" class="form-label">Статус</label>
-                        <select asp-for="Status" class="form-select">
+                        <label asp-for="Status" class="form-label text-primary fw-bold">Статус задачи</label>
+                        <select asp-for="Status" class="form-select border-primary fw-bold">
                             <option value="0">ToDo</option>
                             <option value="1">In Progress</option>
                             <option value="2">Done</option>
                         </select>
                     </div>
 
+                    @* Комментарий *@
                     <div class="col-md-12 mb-3">
                         <label asp-for="Comment" class="form-label">Комментарий</label>
-                        <textarea asp-for="Comment" class="form-control" rows="3"></textarea>
-                        <span asp-validation-for="Comment" class="text-danger"></span>
+                        <textarea asp-for="Comment" class="form-control" rows="3" readonly="@isEmployee"></textarea>
                     </div>
                 </div>
 
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-primary px-4">Сохранить</button>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-save"></i> Сохранить
+                    </button>
                     <a href="@(string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["returnUrl"]) ? Url.Action("Index") : ViewContext.HttpContext.Request.Query["returnUrl"])"
-                       class="btn btn-outline-secondary px-4">
-                        Отмена
-                    </a>
+                       class="btn btn-outline-secondary px-4">Отмена</a>
                 </div>
             </form>
         </div>

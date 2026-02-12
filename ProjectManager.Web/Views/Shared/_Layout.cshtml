@@ -18,39 +18,38 @@
                     <i class="bi bi-kanban me-2"></i>PM System
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between" id="mainNavbar">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Projects" ? "active text-white" : "text-light")"
-                               asp-area="" asp-controller="Projects" asp-action="Index">
-                                <i class="bi bi-layers me-1"></i>Проекты
-                            </a>
+                               asp-controller="Projects" asp-action="Index">Проекты</a>
                         </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Employees" ? "active text-white" : "text-light")"
-                               asp-area="" asp-controller="Employees" asp-action="Index">
-                                <i class="bi bi-people me-1"></i>Сотрудники
-                            </a>
-                        </li>
-
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Employees" ? "active text-white" : "text-light")"
+                                   asp-controller="Employees" asp-action="Index">Сотрудники</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Tasks" ? "active text-white" : "text-light")"
-                               asp-area="" asp-controller="Tasks" asp-action="Index">
-                                <i class="bi bi-list-check me-1"></i>Задачи
-                            </a>
+                               asp-controller="Tasks" asp-action="Index">Задачи</a>
                         </li>
                     </ul>
 
-                    <div class="d-flex">
-                        <a class="btn btn-outline-success btn-sm" asp-controller="Projects" asp-action="Create">
-                            + Новый проект
-                        </a>
+                    <div class="d-flex align-items-center gap-3">
+                        @if (User.Identity.IsAuthenticated && (User.IsInRole("Admin")))
+                        {
+                            <a class="btn btn-outline-success btn-sm" asp-controller="Projects" asp-action="Create">
+                                <i class="bi bi-plus-lg"></i> Новый проект
+                            </a>
+                        }
+                        <partial name="_LoginPartial" />
                     </div>
                 </div>
             </div>

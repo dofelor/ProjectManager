@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ProjectManager.Logic.Dtos
+﻿namespace ProjectManager.Logic.Dtos
 {
     public class ProjectDTO
     {
@@ -16,11 +10,13 @@ namespace ProjectManager.Logic.Dtos
         public DateTime? EndDate { get; set; }
         public int Priority { get; set; }
 
-        // Данные руководителя
         public int SupervisorId { get; set; }
         public string? SupervisorFullName { get; set; }
 
-        // Список ID и имен сотрудников для отображения
+        // ДОБАВЬ ЭТО ПОЛЕ:
+        // Сюда будет попадать UserId (GUID) из таблицы AspNetUsers
+        public string? SupervisorUserId { get; set; }
+
         public List<EmployeeDTO> Employees { get; set; } = new();
     }
 }

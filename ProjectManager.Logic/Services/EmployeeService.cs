@@ -26,7 +26,8 @@ namespace ProjectManager.Logic.Services
                     FirstName = e.FirstName,
                     LastName = e.LastName,
                     MiddleName = e.MiddleName,
-                    Email = e.Email
+                    Email = e.Email,
+                    UserId = e.UserId
                 })
                 .ToListAsync();
         }
@@ -39,7 +40,8 @@ namespace ProjectManager.Logic.Services
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 MiddleName = dto.MiddleName,
-                Email = dto.Email
+                Email = dto.Email,
+                UserId = dto.UserId
             };
 
             _context.Employees.Add(employee);
@@ -80,25 +82,25 @@ namespace ProjectManager.Logic.Services
             await _context.SaveChangesAsync();
         }
 
+        // В EmployeeService.cs
         public async Task<bool> DeleteEmployeeAsync(int id)
         {
-            // 1. Проверяем, не является ли он супервизором любого проекта
-            bool isSupervisor = await _context.Projects.AnyAsync(p => p.SupervisorId == id);
-            if (isSupervisor) return false;
+            // Проверка на авторство задач (то, что упало на скрине)
+            bool hasTasks = await _context.ProjectTasks.AnyAsync(t => t.AuthorId == id || t.ExecutorId == id);
+            // Проверка на руководство проектами
+            bool hasProjects = await _context.Projects.AnyAsync(p => p.SupervisorId == id);
 
-            var employee = await _context.Employees
-                .Include(e => e.Projects) // Чтобы очистить связи many-to-many
-                .FirstOrDefaultAsync(e => e.Id == id);
-
-            if (employee != null)
+            if (hasTasks || hasProjects)
             {
-                // Очищаем связи с проектами, где он просто исполнитель
-                employee.Projects?.Clear();
-                _context.Employees.Remove(employee);
-                await _context.SaveChangesAsync();
-                return true;
+                return false; // Возвращаем false, чтобы контроллер показал TempData["Error"]
             }
-            return false;
+
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null) return false;
+
+            _context.Employees.Remove(employee);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
 
