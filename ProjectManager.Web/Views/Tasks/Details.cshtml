@@ -1,0 +1,48 @@
+﻿@model ProjectManager.Logic.Dtos.ProjectTaskDTO
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-info text-white d-flex justify-content-between">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb p-2 bg-light rounded">
+                    <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Проекты</a></li>
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">@Model.ProjectName</a>
+                    </li>
+                    <li class="breadcrumb-item active">@Model.Name</li>
+                </ol>
+            </nav>
+            <h4 class="mb-0">Детали задачи #@Model.Id</h4>
+            <span class="badge bg-light text-dark">Статус: @((ProjectManager.Data.Entities.TaskStatus)Model.Status)</span>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Название</dt>
+                <dd class="col-sm-9">@Model.Name</dd>
+
+                <dt class="col-sm-3">Проект</dt>
+                <dd class="col-sm-9">@Model.ProjectName</dd>
+
+                <dt class="col-sm-3">Автор</dt>
+                <dd class="col-sm-9">@Model.AuthorFullName</dd>
+
+                <dt class="col-sm-3">Исполнитель</dt>
+                <dd class="col-sm-9">@Model.ExecutorFullName</dd>
+
+                <dt class="col-sm-3">Приоритет</dt>
+                <dd class="col-sm-9">@Model.Priority</dd>
+
+                <dt class="col-sm-3">Комментарий</dt>
+                <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.Comment) ? "Нет комментария" : Model.Comment)</dd>
+            </dl>
+        </div>
+        <div class="card-footer">
+            <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-primary">Редактировать</a>
+
+            @* Если пришел из проекта, вернется в проект. Если из списка — в список *@
+            <a href="@(string.IsNullOrEmpty(ViewBag.ReturnUrl) ? Url.Action("Index") : ViewBag.ReturnUrl)" class="btn btn-secondary">
+                Назад
+            </a>
+        </div>
+    </div>
+</div>

@@ -9,7 +9,7 @@ namespace ProjectManager.Logic.Services
     public interface IProjectService
     {
         // Добавлена сортировка и получение одного проекта
-        Task<List<ProjectDTO>> GetAllProjectAsync(int? priority, DateTime? from, DateTime? to, string? sortBy);
+        Task<List<ProjectDTO>> GetAllProjectAsync(int? priority = null, DateTime? from = null, DateTime? to = null, string? sortBy = null);
         Task<ProjectDTO?> GetProjectByIdAsync(int id);
 
         // employeeIds — список ID для связи many-to-many

@@ -5,6 +5,7 @@
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
+    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
     <div class="row">
         <div class="col-md-6">
@@ -84,8 +85,10 @@
     </div>
 
     <div class="mt-4">
-        <button type="submit" class="btn btn-success">Сохранить изменения</button>
-        <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+
+        <a href="@(string.IsNullOrEmpty(ViewBag.ReturnUrl) ? Url.Action("Index") : ViewBag.ReturnUrl)"
+           class="btn btn-outline-secondary">Отмена</a>
     </div>
 </form>
 

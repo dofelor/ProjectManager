@@ -19,6 +19,7 @@ namespace ProjectManager.Web
             // Регистрация сервисов для Dependency Injection
             builder.Services.AddScoped<IProjectService, ProjectService>();
             builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+            builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

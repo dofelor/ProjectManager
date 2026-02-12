@@ -13,6 +13,8 @@ namespace ProjectManager.Data
         public DbSet<Project> Projects { get; set; }
         public DbSet<Employee> Employees { get; set; }
 
+        public DbSet<ProjectTask> ProjectTasks { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -29,6 +31,20 @@ namespace ProjectManager.Data
                 .WithMany(e => e.SupervisedProjects) // <-- Указываем имя того самого свойства из ошибки
                 .HasForeignKey(p => p.SupervisorId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ProjectTask>()
+                .HasOne(t => t.Author)
+                .WithMany()
+                .HasForeignKey(t => t.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict); // Запрещаем удаление сотрудника, если есть задачи
+
+            modelBuilder.Entity<ProjectTask>()
+                .HasOne(t => t.Executor)
+                .WithMany()
+                .HasForeignKey(t => t.ExecutorId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
+
+
     }
 }

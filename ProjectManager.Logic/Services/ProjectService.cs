@@ -15,7 +15,7 @@ namespace ProjectManager.Logic.Services
             _context = context; 
         }
 
-        public async Task<List<ProjectDTO>> GetAllProjectAsync(int? priority, DateTime? from, DateTime? to, string? sortBy)
+        public async Task<List<ProjectDTO>> GetAllProjectAsync(int? priority = null, DateTime? from = null, DateTime? to = null, string? sortBy = null)
         {
             var query = _context.Projects
                 .Include(p => p.Supervisor)

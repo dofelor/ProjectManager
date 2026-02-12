@@ -1,0 +1,83 @@
+﻿@model IEnumerable<ProjectManager.Logic.Dtos.ProjectTaskDTO>
+
+@{
+    ViewData["Title"] = "Список задач";
+}
+
+<h2>Список всех задач</h2>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <form asp-action="Index" method="get" class="d-flex align-items-end gap-3">
+            <div class="flex-grow-1">
+                <label class="form-label">Проект</label>
+                @Html.DropDownList("projectName", (SelectList)ViewBag.Projects, "Все проекты", new { @class = "form-select" })
+            </div>
+
+            <<div class="flex-grow-1">
+                <label class="form-label">Статус</label>
+                <select name="status" class="form-select">
+                    <option value="">Все статусы</option>
+                    @* Проверяем, какой ID пришел в URL, и добавляем атрибут selected *@
+                    <option value="0" selected="@(Context.Request.Query["status"] == "0")">ToDo</option>
+                    <option value="1" selected="@(Context.Request.Query["status"] == "1")">InProgress</option>
+                    <option value="2" selected="@(Context.Request.Query["status"] == "2")">Done</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Фильтровать</button>
+            <a asp-action="Create" class="btn btn-success">Создать задачу</a>
+        </form>
+    </div>
+</div>
+
+<table class="table table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>Название</th>
+            <th>Проект</th>
+            <th>Исполнитель</th>
+            <th>Приоритет</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td><strong>@item.Name</strong></td>
+                <td>@item.ProjectName</td>
+                <td>@item.ExecutorFullName</td>
+                <td>
+                    <span class="badge bg-secondary">@item.Priority</span>
+                </td>
+                <td>
+                    @switch (item.Status)
+                    {
+                        case 0:
+                            <span class="badge bg-info text-dark">ToDo</span>
+                            break;
+                        case 1:
+
+                            <span class="badge bg-warning text-dark">In Progress</span>
+                            break;
+                        case 2:
+
+                            <span class="badge bg-success">Done</span>
+                            break;
+                    }
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary">Редакт.</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info">Инфо</a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Удалить задачу?');" style="display:inline">
+                            <button type="submit" class="btn btn-outline-danger">Удалить</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
