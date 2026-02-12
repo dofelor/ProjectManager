@@ -1,0 +1,33 @@
+/* Убираем стандартные костыли шаблона */
+html {
+    height: 100%;
+}
+
+body {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Контент растет и толкает футер вниз */
+main {
+    flex: 1 0 auto;
+    padding-bottom: 2rem; /* Чтобы контент не прилипал к футеру */
+}
+
+/* Футер просто стоит в конце потока, никого не перекрывая */
+.footer {
+    flex-shrink: 0;
+    width: 100%;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 1.5rem 0;
+    position: static !important; /* Гвоздями прибиваем, чтобы не всплывал */
+}
+
+/* Исправляем наслоение таблиц на мобилках */
+.table-responsive {
+    overflow-x: auto;
+    background: white;
+    margin-bottom: 1rem;
+}

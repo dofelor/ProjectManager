@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ProjectManager.Data/ProjectManager.Data.csproj" />
+  <Project Path="ProjectManager.Logic/ProjectManager.Logic.csproj" />
+  <Project Path="ProjectManager.Web/ProjectManager.Web.csproj" />
+</Solution>

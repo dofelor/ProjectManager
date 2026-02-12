@@ -1,0 +1,218 @@
+﻿@model ProjectFormViewModel
+
+<h2 class="mb-4">Создание нового проекта (Визард)</h2>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form id="projectWizardForm" asp-action="Create" method="post" enctype="multipart/form-data">
+
+    <div class="wizard-step" id="step1">
+        <h4>Шаг 1: Основная информация</h4>
+        <div class="mb-3">
+            <label asp-for="Project.Name" class="form-label">Название проекта</label>
+            <input asp-for="Project.Name" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Project.CustomerCompany" class="form-label">Компания-заказчик</label>
+            <input asp-for="Project.CustomerCompany" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Project.PerformingCompany" class="form-label">Компания-исполнитель</label>
+            <input asp-for="Project.PerformingCompany" class="form-control" />
+        </div>
+        <button type="button" class="btn btn-primary next-step">Далее</button>
+    </div>
+
+    <div class="wizard-step d-none" id="step2">
+        <h4>Шаг 2: Сроки и приоритет</h4>
+        <div class="mb-3">
+            <label asp-for="Project.StartDate" class="form-label">Дата начала</label>
+            <input asp-for="Project.StartDate" type="date" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Project.EndDate" class="form-label">Дата окончания</label>
+            <input asp-for="Project.EndDate" type="date" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Project.Priority" class="form-label">Приоритет</label>
+            <input asp-for="Project.Priority" type="number" class="form-control" />
+        </div>
+        <button type="button" class="btn btn-secondary prev-step">Назад</button>
+        <button type="button" class="btn btn-primary next-step">Далее</button>
+    </div>
+
+    <div class="wizard-step d-none" id="step3">
+        <h4>Шаг 3: Руководитель проекта</h4>
+        <div class="mb-3">
+            <label asp-for="Project.SupervisorId" class="form-label">Выберите руководителя</label>
+            <select asp-for="Project.SupervisorId" class="form-select"
+                    asp-items="@(new SelectList(Model.AllEmployees, "Id", "FullName"))">
+                <option value="">-- Выберите из списка --</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-secondary prev-step">Назад</button>
+        <button type="button" class="btn btn-primary next-step">Далее</button>
+    </div>
+
+    <div class="wizard-step d-none" id="step4">
+        <h4>Шаг 4: Состав команды</h4>
+        <div class="mb-3">
+            <label class="form-label">Выберите участников команды</label>
+            <input type="text" id="employeeSearch" class="form-control mb-2" placeholder="Начните вводить имя...">
+            <div id="allEmployeesContainer" class="border p-2" style="max-height: 200px; overflow-y: auto;">
+                @foreach (var emp in Model.AllEmployees)
+                {
+                    <div class="employee-item p-1" data-name="@emp.FullName.ToLower()" data-id="@emp.Id" style="cursor:pointer;">
+                        <span class="badge bg-light text-dark">+ @emp.FullName</span>
+                    </div>
+                }
+            </div>
+        </div>
+        <h5>Выбранные участники:</h5>
+        <ul id="selectedEmployeesList" class="list-group mb-3"></ul>
+
+        <button type="button" class="btn btn-secondary prev-step">Назад</button>
+        <button type="button" class="btn btn-primary next-step">Далее</button>
+    </div>
+
+    <div class="wizard-step d-none" id="step5">
+        <h4>Шаг 5: Документация проекта</h4>
+        <hr />
+        <div class="mb-3">
+            <label class="form-label">Загрузите файлы (ТЗ, Договор, Макеты)</label>
+            <div id="dropzone" class="border border-primary border-2 border-dashed rounded-3 p-5 text-center bg-light" style="border-style: dashed !important; cursor: pointer;">
+                <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                <p class="mt-2">Перетащите файлы сюда или <strong>кликните для выбора</strong></p>
+                <input type="file" name="ProjectFiles" id="fileInput" multiple class="d-none" />
+            </div>
+            <ul id="fileList" class="list-group mt-3"></ul>
+        </div>
+
+        <div class="mt-4">
+            <button type="button" class="btn btn-secondary prev-step">Назад</button>
+            <button type="submit" class="btn btn-success">Создать проект</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 1. Навигация визарда
+            $(".next-step, .prev-step").click(function() {
+                let currentStep = $(this).closest(".wizard-step");
+                let isNext = $(this).hasClass("next-step");
+                let targetStep = isNext ? currentStep.next(".wizard-step") : currentStep.prev(".wizard-step");
+
+                if (isNext && currentStep.attr('id') === 'step2') {
+                    let startVal = $("[name='Project.StartDate']").val();
+                    let endVal = $("[name='Project.EndDate']").val();
+                    if (startVal && endVal && new Date(endVal) < new Date(startVal)) {
+                        alert("Дата окончания не может быть раньше даты начала!");
+                        return false;
+                    }
+                }
+
+                currentStep.addClass("d-none");
+                targetStep.removeClass("d-none");
+            });
+
+            // 2. Поиск и выбор сотрудников
+            $("#employeeSearch").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#allEmployeesContainer .employee-item").filter(function() {
+                    $(this).toggle($(this).data("name").indexOf(value) > -1);
+                });
+            });
+
+            $(document).on("click", ".employee-item", function() {
+                let id = $(this).data("id");
+                let name = $(this).find('.badge').text().replace('+', '').trim();
+                if ($(`#emp-input-${id}`).length === 0) {
+                    $("#selectedEmployeesList").append(`
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    ${name}
+                                    <input type="hidden" name="SelectedEmployeeIds" id="emp-input-${id}" value="${id}" />
+                                    <button type="button" class="btn btn-outline-danger btn-sm remove-emp">Удалить</button>
+                                </li>`);
+                }
+                $("#employeeSearch").val("").keyup();
+            });
+
+            $(document).on("click", ".remove-emp", function() {
+                $(this).closest("li").remove();
+            });
+
+            // 3. Drag and Drop логика
+            const $dropzone = $('#dropzone');
+            const $fileInput = $('#fileInput');
+            const $fileList = $('#fileList');
+
+            $dropzone.on('click', function(e) {
+                if (e.target !== $fileInput[0]) {
+                    $fileInput[0].click();
+                }
+            });
+
+            $(document).on('dragover dragenter dragleave drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            $dropzone.on('dragover dragenter', function() {
+                $(this).addClass('bg-primary text-white border-light');
+            });
+
+            $dropzone.on('dragleave dragend drop', function() {
+                $(this).removeClass('bg-primary text-white border-light');
+            });
+
+            $dropzone.on('drop', function(e) {
+                const files = e.originalEvent.dataTransfer.files;
+                if (files.length > 0) {
+                    // Чтобы файлы ДОБАВЛЯЛИСЬ к существующим, а не заменяли их,
+                    // можно объединить списки, но для простоты оставим замену.
+                    updateFileList(files);
+                }
+            });
+
+            $fileInput.on('change', function() {
+                updateFileList(this.files);
+            });
+
+            // Обработчик удаления файла (ТЕПЕРЬ ВНУТРИ READY)
+            $(document).on('click', '.remove-file-btn', function() {
+                const indexToRemove = $(this).closest('li').data('index');
+                const dt = new DataTransfer();
+                const files = $fileInput[0].files;
+
+                for (let i = 0; i < files.length; i++) {
+                    if (i !== indexToRemove) {
+                        dt.items.add(files[i]);
+                    }
+                }
+
+                $fileInput[0].files = dt.files;
+                updateFileList(dt.files);
+            });
+
+            function updateFileList(files) {
+                $fileList.empty();
+                const dt = new DataTransfer();
+
+                Array.from(files).forEach((file, index) => {
+                    dt.items.add(file);
+                    const size = (file.size / 1024).toFixed(1) + ' KB';
+                    $fileList.append(`
+                            <li class="list-group-item d-flex justify-content-between align-items-center" data-index="${index}">
+                                <span><i class="bi bi-file-earmark-arrow-up me-2"></i>${file.name} (${size})</span>
+                                <button type="button" class="btn btn-outline-danger btn-sm remove-file-btn">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </li>`);
+                });
+                $fileInput[0].files = dt.files;
+            }
+        });
+    </script>
+}

@@ -1,0 +1,72 @@
+﻿@model IEnumerable<ProjectManager.Logic.Dtos.ProjectDTO>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Список проектов</h1>
+    <a asp-action="Create" class="btn btn-primary">Создать новый проект</a>
+</div>
+
+<form method="get" class="row g-3 mb-4 p-3 bg-light border rounded">
+    <div class="col-md-3">
+        <label class="form-label">Дата начала (от)</label>
+        <input type="date" name="dateFrom" class="form-control" value="@Context.Request.Query["dateFrom"]">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Дата начала (до)</label>
+        <input type="date" name="dateTo" class="form-control" value="@Context.Request.Query["dateTo"]">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Приоритет</label>
+        <input type="number" name="priority" class="form-control" value="@Context.Request.Query["priority"]">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-secondary w-100">Применить</button>
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <a asp-action="Index" class="btn btn-outline-secondary w-100">Сброс</a>
+    </div>
+</form>
+
+<div class="table-responsive border rounded shadow-sm">
+    <table class="table table-striped table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>
+                    <a asp-action="Index" asp-all-route-data="@Context.Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString())" asp-route-sortBy="Name">Название ▲▼</a>
+                </th>
+                <th>Заказчик</th>
+                <th>Руководитель</th>
+                <th>
+                    <a asp-action="Index" asp-all-route-data="@Context.Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString())" asp-route-sortBy="Priority">Приоритет ▲▼</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-all-route-data="@Context.Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString())" asp-route-sortBy="StartDate">Сроки ▲▼</a>
+                </th>
+                <th class="text-end">Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="fw-bold">@item.Name</td>
+                    <td>@item.CustomerCompany</td>
+                    <td>@item.SupervisorFullName</td>
+                    <td><span class="badge bg-info text-dark">@item.Priority</span></td>
+                    <td class="text-nowrap small">
+                        @item.StartDate?.ToShortDateString() — @item.EndDate?.ToShortDateString()
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Удалить проект?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

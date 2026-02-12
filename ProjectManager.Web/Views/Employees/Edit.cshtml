@@ -1,0 +1,34 @@
+﻿@model ProjectManager.Logic.Dtos.EmployeeDTO
+
+<h2>Редактировать сотрудника</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" /> @* КРИТИЧНО: чтобы сервер знал, кого обновлять *@
+
+    <div class="mb-3">
+        <label asp-for="LastName" class="form-label">Фамилия</label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="FirstName" class="form-label">Имя</label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="MiddleName" class="form-label">Отчество</label>
+        <input asp-for="MiddleName" class="form-control" />
+        <span asp-validation-for="MiddleName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Сохранить изменения</button>
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+</form>
