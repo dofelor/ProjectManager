@@ -43,3 +43,22 @@ If you want to run the project via Visual Studio or the .NET CLI, you need to ha
     }
     ```
 3.  Run the application using Visual Studio (F5) or `dotnet run`.
+
+---
+
+## 🔐 Authentication & User Setup
+
+### 1. Admin Login
+To start using the system, log in with the default administrator account:
+- **Login:** `admin@test.com`
+- **Password:** `Admin123!`
+
+### 2. Creating Employees
+1. Log in as **Admin**.
+2. Navigate to the **Employees** section.
+3. Click **Create New Employee**.
+4. Fill in the details. **Important:** You must specify a **Temporary Password** for the employee here.
+5. The **Email** address specified will be the employee's login.
+
+### 3. Employee Login
+Employees can log in using the **Email** and **Temporary Password** set by the Admin during creation.
