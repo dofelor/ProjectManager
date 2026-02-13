@@ -14,7 +14,11 @@ namespace ProjectManager.Web
 
             // Add services to the container.
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+                sqlOptions => sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    errorNumbersToAdd: null)));
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options =>
             {
@@ -24,12 +28,12 @@ namespace ProjectManager.Web
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
             })
-            .AddRoles<IdentityRole>() // ВКЛЮЧАЕМ РОЛИ
+            .AddRoles<IdentityRole>() // Enable Roles
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
             builder.Services.AddControllersWithViews();
 
-            // Регистрация сервисов для Dependency Injection
+            // Register services for Dependency Injection
             builder.Services.AddScoped<IProjectService, ProjectService>();
             builder.Services.AddScoped<IEmployeeService, EmployeeService>();
             builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
@@ -58,10 +62,8 @@ namespace ProjectManager.Web
 
             app.UseRouting();
 
-            app.UseAuthentication(); // Проверка: кто ты?
-            app.UseAuthorization();  // Проверка: что тебе можно?
-
-            app.UseAuthorization();
+            app.UseAuthentication(); // Check: who are you? (Authentication)
+            app.UseAuthorization();  // Check: what can you do? (Authorization)
 
             app.MapControllerRoute(
                 name: "default",
@@ -70,7 +72,19 @@ namespace ProjectManager.Web
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                await RoleInitializer.InitializeAsync(services);
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    // Apply migrations automatically - this will create the DB if it doesn't exist
+                    await context.Database.MigrateAsync();
+                    
+                    await RoleInitializer.InitializeAsync(services);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while initializing the database.");
+                }
             }
             app.MapRazorPages();
 

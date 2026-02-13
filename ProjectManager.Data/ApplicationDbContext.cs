@@ -21,16 +21,16 @@ namespace ProjectManager.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // 1. Настройка связи "Многие-ко-многим" (Команда)
+            // 1. Configure "Many-to-Many" relationship (Team)
             modelBuilder.Entity<Project>()
                 .HasMany(p => p.Employees)
                 .WithMany(e => e.Projects);
 
-            // 2. Настройка связи "Один-ко-многим" (Руководитель)
-            // Мы явно связываем коллекцию SupervisedProjects с внешним ключом SupervisorId
+            // 2. Configure "One-to-Many" relationship (Supervisor)
+            // Explicitly bind the SupervisedProjects collection to the SupervisorId foreign key
             modelBuilder.Entity<Project>()
                 .HasOne(p => p.Supervisor)
-                .WithMany(e => e.SupervisedProjects) // <-- Указываем имя того самого свойства из ошибки
+                .WithMany(e => e.SupervisedProjects)
                 .HasForeignKey(p => p.SupervisorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -38,7 +38,7 @@ namespace ProjectManager.Data
                 .HasOne(t => t.Author)
                 .WithMany()
                 .HasForeignKey(t => t.AuthorId)
-                .OnDelete(DeleteBehavior.Restrict); // Запрещаем удаление сотрудника, если есть задачи
+                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of employee if they have associated tasks
 
             modelBuilder.Entity<ProjectTask>()
                 .HasOne(t => t.Executor)

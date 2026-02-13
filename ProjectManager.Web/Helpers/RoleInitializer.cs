@@ -17,7 +17,7 @@ public static class RoleInitializer
             }
         }
 
-        // Создаем одного Админа по умолчанию (для тестов)
+        // Create one default Admin (for testing)
         string adminEmail = "admin@test.com";
         if (await userManager.FindByEmailAsync(adminEmail) == null)
         {

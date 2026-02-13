@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyTaskStatus = ProjectManager.Data.Entities.TaskStatus; // Добавь это
+using MyTaskStatus = ProjectManager.Data.Entities.TaskStatus;
 
 namespace ProjectManager.Logic.Services
 {
@@ -28,7 +28,7 @@ namespace ProjectManager.Logic.Services
                 .Include(t => t.Executor)
                 .AsQueryable();
 
-            // Фильтрация по ТЗ
+            // Filter by requirements
             if (projectId.HasValue) query = query.Where(t => t.ProjectId == projectId);
             if (status.HasValue) query = query.Where(t => t.Status == (MyTaskStatus)status);
 
@@ -100,7 +100,7 @@ namespace ProjectManager.Logic.Services
             task.AuthorId = dto.AuthorId;
             task.ExecutorId = dto.ExecutorId;
             task.Priority = dto.Priority;
-            task.Status = (MyTaskStatus)dto.Status; // Используем полное имя
+            task.Status = (MyTaskStatus)dto.Status; // Use fully qualified name
             task.Comment = dto.Comment;
 
             await _context.SaveChangesAsync();

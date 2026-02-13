@@ -13,13 +13,13 @@ namespace ProjectManager.Web.Controllers
         private readonly IProjectService _projectService;
         private readonly IEmployeeService _employeeService;
         private readonly IProjectTaskService _taskService;
-        private readonly UserManager<IdentityUser> _userManager; // Добавили
+        private readonly UserManager<IdentityUser> _userManager;
 
         public ProjectsController(
             IProjectService projectService,
             IEmployeeService employeeService,
             IProjectTaskService taskService,
-            UserManager<IdentityUser> userManager) // Внедряем
+            UserManager<IdentityUser> userManager)
         {
             _projectService = projectService;
             _employeeService = employeeService;
@@ -27,7 +27,7 @@ namespace ProjectManager.Web.Controllers
             _userManager = userManager;
         }
 
-        // 1. Список проектов с фильтрацией по ролям
+        // 1. List of projects with role filtering
         [HttpGet]
         public async Task<IActionResult> Index(int? priority, DateTime? dateFrom, DateTime? dateTo, string? sortBy)
         {
@@ -36,13 +36,13 @@ namespace ProjectManager.Web.Controllers
 
             if (User.IsInRole("ProjectManager"))
             {
-                // 1. Находим Id сотрудника для текущего менеджера
+                // 1. Find Employee Id for current manager
                 var employees = await _employeeService.GetAllEmployeeAsync();
                 var currentEmployee = employees.FirstOrDefault(e => e.UserId == currentUserId);
 
                 if (currentEmployee != null)
                 {
-                    // 2. Оставляем проекты, где он Supervisor ИЛИ член команды
+                    // 2. Keep projects where they are Supervisor OR team member
                     allProjects = allProjects.Where(p =>
                         p.SupervisorId == currentEmployee.Id ||
                         (p.Employees != null && p.Employees.Any(e => e.UserId == currentUserId))
@@ -82,16 +82,16 @@ namespace ProjectManager.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProjectFormViewModel model, IFormFileCollection ProjectFiles)
         {
-            // 1. Проверяем валидность модели
+            // 1. Check model validity
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // 2. ВЫЗОВ СЕРВИСА (был закомментирован)
-                    // Передаем данные проекта и список ID сотрудников, выбранных в визарде
+                    // 2. SERVICE CALL
+                    // Pass project data and selected employee IDs
                     await _projectService.CreateProjectAsync(model.Project, model.SelectedEmployeeIds);
 
-                    // 3. Обработка файлов
+                    // 3. File processing
                     if (ProjectFiles != null && ProjectFiles.Count > 0)
                     {
                         var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
@@ -111,11 +111,11 @@ namespace ProjectManager.Web.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Ошибка при создании проекта: " + ex.Message);
+                    ModelState.AddModelError("", "Error creating project: " + ex.Message);
                 }
             }
 
-            // Если форма невалидна, нужно заново наполнить список сотрудников для Dropdown
+            // If form is invalid, repopulate employee list for Dropdown
             model.AllEmployees = await _employeeService.GetAllEmployeeAsync();
             return View(model);
         }
@@ -137,35 +137,35 @@ namespace ProjectManager.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ProjectDTO model, List<int> employeeIds, string? returnUrl)
         {
-            // 1. Получаем существующий проект из БД для проверки прав
+            // 1. Get existing project from DB to check permissions
             var existingProject = await _projectService.GetProjectByIdAsync(id);
             if (existingProject == null) return NotFound();
 
-            // 2. Проверка прав: Менеджер может редактировать только СВОИ проекты
+            // 2. Check permissions: Manager can only edit THEIR OWN projects
             if (User.IsInRole("ProjectManager"))
             {
                 var currentUserId = _userManager.GetUserId(User);
                 var employees = await _employeeService.GetAllEmployeeAsync();
                 var currentEmployee = employees.FirstOrDefault(e => e.UserId == currentUserId);
 
-                // Если менеджер не является руководителем этого проекта — доступ запрещен
+                // If manager is not the supervisor of this project — access denied
                 if (currentEmployee == null || existingProject.SupervisorId != currentEmployee.Id)
                 {
                     return Forbid();
                 }
             }
 
-            // 3. Валидация дат
+            // 3. Date validation
             if (model.EndDate < model.StartDate)
             {
-                ModelState.AddModelError("", "Дата окончания не может быть раньше даты начала!");
+                ModelState.AddModelError("", "End date cannot be earlier than start date!");
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // 4. Обновление проекта и списка сотрудников (назначение/удаление)
+                    // 4. Update project and employee list (assign/remove)
                     await _projectService.UpdateProjectAsync(id, model, employeeIds);
 
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -175,17 +175,17 @@ namespace ProjectManager.Web.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Ошибка при сохранении: " + ex.Message);
+                    ModelState.AddModelError("", "Error saving: " + ex.Message);
                 }
             }
 
-            // Если что-то пошло не так, возвращаем форму с данными
+            // If something went wrong, return form with data
             ViewBag.Employees = await _employeeService.GetAllEmployeeAsync();
             ViewBag.ReturnUrl = returnUrl;
             return View(model);
         }
 
-        // Удаление доступно только Админам и Менеджерам
+        // Details available only to Admins and Managers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -198,7 +198,7 @@ namespace ProjectManager.Web.Controllers
             var employees = await _employeeService.GetAllEmployeeAsync();
             var currentEmployee = employees.FirstOrDefault(e => e.UserId == currentUserId);
 
-            // ЗАЩИТА: Менеджер может удалять только свои проекты
+            // PROTECTION: Manager can only delete their own projects
             if (!User.IsInRole("Admin") && project.SupervisorId != currentEmployee?.Id)
             {
                 return Forbid();
@@ -215,13 +215,13 @@ namespace ProjectManager.Web.Controllers
 
             var currentUserId = _userManager.GetUserId(User);
 
-            // Получаем задачи для проекта
+            // Get tasks for project
             var tasks = await _taskService.GetAllTasksAsync(projectId: id);
 
-            // ФИЛЬТРАЦИЯ ЗАДАЧ ДЛЯ СОТРУДНИКА
+            // TASK FILTERING FOR EMPLOYEE
             if (User.IsInRole("Employee"))
             {
-                // В задачах поле исполнителя обычно называется ExecutorUserId (строка)
+                // In tasks, executor field is usually ExecutorUserId (string)
                 tasks = tasks.Where(t => t.ExecutorUserId == currentUserId).ToList();
             }
 

@@ -95,7 +95,7 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Поиск
+            // Search
             $("#employeeSearch").on("keyup", function() {
                 var value = $(this).val().toLowerCase();
                 $("#allEmployeesContainer .employee-item").filter(function() {
@@ -103,7 +103,7 @@
                 });
             });
 
-            // Добавление (исправлено получение имени)
+            // Adding (name retrieval fixed)
             $(document).on("click", ".employee-item", function() {
                 let id = $(this).data("id");
                 let name = $(this).find('.badge').text().replace('+', '').trim();
@@ -120,7 +120,7 @@
                 $("#employeeSearch").val("").keyup();
             });
 
-            // Удаление
+            // Remove
             $(document).on("click", ".remove-emp", function() {
                 $(this).closest("li").remove();
             });

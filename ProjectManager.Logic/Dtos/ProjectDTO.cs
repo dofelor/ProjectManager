@@ -13,8 +13,7 @@
         public int SupervisorId { get; set; }
         public string? SupervisorFullName { get; set; }
 
-        // ДОБАВЬ ЭТО ПОЛЕ:
-        // Сюда будет попадать UserId (GUID) из таблицы AspNetUsers
+        // Stores UserId (GUID) from AspNetUsers table
         public string? SupervisorUserId { get; set; }
 
         public List<EmployeeDTO> Employees { get; set; } = new();

@@ -6,15 +6,15 @@
     ViewData["Title"] = "Детали проекта";
     var currentUserId = UserManager.GetUserId(User);
 
-    // Определяем права доступа
+    // Determine access rights
     bool isAdmin = User.IsInRole("Admin");
 
-    // ВАЖНО: Сравниваем SupervisorUserId из DTO с ID текущего пользователя
+    // IMPORTANT: Compare SupervisorUserId from DTO with current user ID
     bool isProjectSupervisor = User.IsInRole("ProjectManager") &&
                                !string.IsNullOrEmpty(Model.SupervisorUserId) &&
                                Model.SupervisorUserId.Equals(currentUserId, System.StringComparison.OrdinalIgnoreCase);
 
-    // Может ли текущий пользователь редактировать проект и добавлять задачи?
+    // Can current user edit project and add tasks?
     bool canManageProject = isAdmin || isProjectSupervisor;
 }
 
@@ -38,7 +38,7 @@
     </div>
 
     <div class="row">
-        @* Основная информация о проекте *@
+        @* Main project information *@
         <div class="col-md-4">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light">
@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        @* Список задач *@
+        @* Task list *@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -103,13 +103,13 @@
                                         <td>@task.Name</td>
                                         <td>@task.ExecutorFullName</td>
                                         <td>
-                                            @* Тут можно добавить разные цвета для статусов *@
+                                            @* Different colors for statuses can be added here *@
                                             <span class="badge bg-secondary">@task.Status</span>
                                         </td>
                                         <td class="text-end">
-                                            @* Логика доступа к редактированию задачи:
-                                               1. Админ или Менеджер этого проекта могут редактировать любую задачу.
-                                               2. Сотрудник может редактировать (менять статус) только если он исполнитель.
+                                            @* Task edit access logic:
+                                               1. Admin or Manager of this project can edit any task.
+                                               2. Employee can edit (change status) only if they are the executor.
                                             *@
                                             @if (canManageProject || task.ExecutorUserId == currentUserId)
                                             {

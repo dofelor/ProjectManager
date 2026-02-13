@@ -41,22 +41,22 @@ namespace ProjectManager.Web.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            // 1. Создаем Identity аккаунт
+            // 1. Create Identity account
             var user = new IdentityUser { UserName = model.Email, Email = model.Email, EmailConfirmed = true };
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                // 2. Назначаем роль
+                // 2. Assign role
                 await _userManager.AddToRoleAsync(user, model.Role);
 
-                // 3. Создаем запись сотрудника через сервис
+                // 3. Create employee record via service
                 var employeeDto = new EmployeeDTO
                 {
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     Email = model.Email,
-                    UserId = user.Id // Связь установлена сразу!
+                    UserId = user.Id // Link established immediately!
                 };
 
                 await _employeeService.AddEmployeeAsync(employeeDto);
@@ -64,7 +64,7 @@ namespace ProjectManager.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Если Identity не смог создать юзера (пароль слабый и т.д.)
+            // If Identity failed to create user (weak password, etc.)
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError("", error.Description);
@@ -105,25 +105,25 @@ namespace ProjectManager.Web.Controllers
             return View(model);
         }
 
-        // --- Методы для Удаления ---
+        // --- Delete Methods ---
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            // 1. Сначала находим сотрудника, чтобы забрать его Email
+            // 1. First find the employee to get their Email
             var employee = await _employeeService.GetEmployeeByIdAsync(id);
             if (employee == null) return NotFound();
 
-            var userEmail = employee.Email; // Запоминаем почту
+            var userEmail = employee.Email; // Save email
 
-            // 2. Удаляем из таблицы Employees
+            // 2. Remove from Employees table
             var success = await _employeeService.DeleteEmployeeAsync(id);
 
             if (success)
             {
-                // 3. ТЕПЕРЬ САМОЕ ВАЖНОЕ: Ищем юзера в AspNetUsers именно по Email
-                // Это сработает, даже если связь по UserId была кривая
+                // 3. CRITICAL: Find user in AspNetUsers by Email
+                // This works even if UserId link was broken
                 var user = await _userManager.FindByEmailAsync(userEmail);
 
                 if (user != null)
@@ -131,21 +131,21 @@ namespace ProjectManager.Web.Controllers
                     var result = await _userManager.DeleteAsync(user);
                     if (!result.Succeeded)
                     {
-                        // Если не удалилось, выведем ошибки Identity
+                        // If deletion failed, show Identity errors
                         var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                        _logger.LogError($"Не удалось удалить аккаунт Identity: {errors}");
-                        TempData["Error"] = $"Профиль удален, но аккаунт в системе остался: {errors}";
+                        _logger.LogError($"Failed to delete Identity account: {errors}");
+                        TempData["Error"] = $"Profile deleted, but system account remains: {errors}";
                     }
                 }
                 else
                 {
-                    _logger.LogWarning($"Аккаунт с почтой {userEmail} не найден в AspNetUsers.");
+                    _logger.LogWarning($"Account with email {userEmail} not found in AspNetUsers.");
                 }
 
                 return RedirectToAction(nameof(Index));
             }
 
-            TempData["Error"] = "Удаление запрещено: сотрудник связан с задачами или проектами.";
+            TempData["Error"] = "Deletion prohibited: employee is linked to tasks or projects.";
             return RedirectToAction(nameof(Index));
         }
     }

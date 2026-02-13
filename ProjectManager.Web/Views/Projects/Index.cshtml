@@ -59,7 +59,7 @@
                         @item.StartDate?.ToShortDateString() — @item.EndDate?.ToShortDateString()
                     </td>
                     <td class="text-end text-nowrap">
-                        @* ПРОВЕРКА ПРАВ НА КНОПКИ *@
+                        @* CHECK BUTTON PERMISSIONS *@
                         @if (User.IsInRole("Admin") || (User.IsInRole("ProjectManager") && item.SupervisorUserId == currentUserId))
                         {
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">

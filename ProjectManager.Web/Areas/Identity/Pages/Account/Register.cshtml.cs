@@ -126,29 +126,29 @@ namespace ProjectManager.Web.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("Пользователь создал новый аккаунт.");
+                    _logger.LogInformation("User created a new account.");
 
-                    // 1. Поиск предсозданного сотрудника в БД по Email
+                    // 1. Find pre-created employee in DB by Email
                     var employee = await _context.Employees
                         .FirstOrDefaultAsync(e => e.Email == Input.Email);
 
-                    // 2. Логика назначения ролей и привязки
+                    // 2. Role assignment and linking logic
                     if (employee != null)
                     {
-                        // Привязываем Id из Identity к сотруднику
+                        // Link Identity Id to Employee
                         employee.UserId = user.Id;
                         await _context.SaveChangesAsync();
 
-                        // Если в записи сотрудника указано, что он менеджер (или по другой логике),
-                        // можно назначать роль ProjectManager. По умолчанию ставим Employee.
+                        // If employee record says they are a manager (or other logic),
+                        // can assign ProjectManager role. Default to Employee.
                         await _userManager.AddToRoleAsync(user, "Employee");
-                        _logger.LogInformation($"Аккаунт привязан к сотруднику ID: {employee.Id}");
+                        _logger.LogInformation($"Account linked to employee ID: {employee.Id}");
                     }
                     else
                     {
-                        // Если админ не создал запись заранее, просто даем роль Employee
+                        // If admin didn't create record beforehand, just give Employee role
                         await _userManager.AddToRoleAsync(user, "Employee");
-                        _logger.LogWarning($"Запись сотрудника для {Input.Email} не найдена. Привязка UserId не выполнена.");
+                        _logger.LogWarning($"Employee record for {Input.Email} not found. UserId linking skipped.");
                     }
 
                     var userId = await _userManager.GetUserIdAsync(user);
@@ -180,7 +180,7 @@ namespace ProjectManager.Web.Areas.Identity.Pages.Account
                 }
             }
 
-            // Если что-то пошло не так, возвращаем форму
+            // If something went wrong, return form
             return Page();
         }
         private IdentityUser CreateUser()

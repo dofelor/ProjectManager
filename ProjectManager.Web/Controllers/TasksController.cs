@@ -27,7 +27,7 @@ namespace ProjectManager.Web.Controllers
             _userManager = userManager;
         }
 
-        // 1. Список задач с фильтрацией
+        // 1. Task list with filtering
         public async Task<IActionResult> Index(int? projectId, int? status)
         {
             var tasks = await _taskService.GetAllTasksAsync(projectId, status);
@@ -35,13 +35,13 @@ namespace ProjectManager.Web.Controllers
 
             if (User.IsInRole("Employee"))
             {
-                // Обычный сотрудник видит только свои задачи
+                // Regular employee sees only their own tasks
                 tasks = tasks.Where(t => t.ExecutorUserId == currentUserId).ToList();
             }
             else if (User.IsInRole("ProjectManager"))
             {
-                // Менеджер видит задачи во всех проектах, но управлять сможет только своими (проверка в Edit)
-                // Опционально: можно отфильтровать список задач только для его проектов здесь
+                // Manager sees tasks in all projects, but can manage only their own (check in Edit)
+                // Optional: filter task list for their projects here
             }
 
             ViewBag.Projects = new SelectList(await _projectService.GetAllProjectAsync(), "Id", "Name");
@@ -54,7 +54,7 @@ namespace ProjectManager.Web.Controllers
         {
             if (!projectId.HasValue) return BadRequest();
 
-            // Добавляем проверку прав уже на входе!
+            // Add permission check at entry!
             if (User.IsInRole("ProjectManager"))
             {
                 if (!await IsProjectSupervisor(projectId.Value)) return Forbid();
@@ -70,16 +70,16 @@ namespace ProjectManager.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProjectTaskDTO model)
         {
-            // 1. Проверка прав (оставляем как было)
+            // 1. Permission check (keep as is)
             if (User.IsInRole("ProjectManager"))
             {
                 if (!await IsProjectSupervisor(model.ProjectId)) return Forbid();
             }
 
-            // 2. Ищем конкретно ЭТОГО сотрудника напрямую
+            // 2. Find THIS specific employee directly
             var currentUserId = _userManager.GetUserId(User);
 
-            // Получаем список один раз и ищем по UserId (строка в строку)
+            // Get list once and search by UserId (exact match)
             var allEmployees = await _employeeService.GetAllEmployeeAsync();
             var currentEmployee = allEmployees.FirstOrDefault(e =>
                 !string.IsNullOrWhiteSpace(e.UserId) &&
@@ -87,8 +87,8 @@ namespace ProjectManager.Web.Controllers
 
             if (currentEmployee == null)
             {
-                // Если зашли сюда — значит в таблице Employees нет записи с UserId = currentUserId
-                ModelState.AddModelError("", $"Ошибка: Профиль сотрудника не найден для вашего UserId ({currentUserId}). Проверьте таблицу Employees.");
+                // If here — no record in Employees table with UserId = currentUserId
+                ModelState.AddModelError("", $"Error: Employee profile not found for your UserId ({currentUserId}). Check Employees table.");
             }
             else
             {
@@ -104,8 +104,8 @@ namespace ProjectManager.Web.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Это поймает ту самую SqlException и выведет её на экран вместо белого окна
-                    ModelState.AddModelError("", "Ошибка сохранения в БД. Убедитесь, что AuthorId корректен. " + ex.Message);
+                    // Catches SqlException and shows it on screen instead of white page
+                    ModelState.AddModelError("", "Error saving to DB. Ensure AuthorId is correct. " + ex.Message);
                 }
             }
 
@@ -119,7 +119,7 @@ namespace ProjectManager.Web.Controllers
             var taskDto = await _taskService.GetTaskByIdAsync(id);
             if (taskDto == null) return NotFound();
 
-            // ПРОВЕРКА ПРАВ
+            // PERMISSION CHECK
             if (User.IsInRole("Employee"))
             {
                 if (taskDto.ExecutorUserId != _userManager.GetUserId(User)) return Forbid();
@@ -141,16 +141,16 @@ namespace ProjectManager.Web.Controllers
             var existingTask = await _taskService.GetTaskByIdAsync(taskDto.Id);
             if (existingTask == null) return NotFound();
 
-            // ПРОВЕРКА ПРАВ ПЕРЕД СОХРАНЕНИЕМ
+            // PERMISSION CHECK BEFORE SAVE
             if (User.IsInRole("Employee"))
             {
-                // Сотрудник может только менять статус, но мы проверяем владение
+                // Employee can only change status, but we check ownership
                 if (existingTask.ExecutorUserId != _userManager.GetUserId(User)) return Forbid();
 
-                // Чтобы сотрудник не подменил проект или автора через инспект кода:
+                // Prevent employee from swapping project or author via code inspection:
                 taskDto.ProjectId = existingTask.ProjectId;
                 taskDto.AuthorId = existingTask.AuthorId;
-                taskDto.Name = existingTask.Name; // Запрещаем менять название
+                taskDto.Name = existingTask.Name; // Prevent name change
             }
             else if (User.IsInRole("ProjectManager"))
             {
@@ -186,20 +186,20 @@ namespace ProjectManager.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Вспомогательный метод для проверки: является ли текущий юзер менеджером этого проекта
+        // Helper method to check if current user is manager of this project
         private async Task<bool> IsProjectSupervisor(int projectId)
         {
             if (User.IsInRole("Admin")) return true;
 
-            // 1. Получаем проект (в нем уже есть SupervisorUserId благодаря нашему сервису)
+            // 1. Get project (SupervisorUserId is already there thanks to service)
             var project = await _projectService.GetProjectByIdAsync(projectId);
             if (project == null) return false;
 
-            // 2. Получаем ID текущего пользователя из Identity
+            // 2. Get current user ID from Identity
             var currentUserId = _userManager.GetUserId(User);
 
-            // 3. Сравниваем напрямую GUID-строки из Identity
-            // Это самый надежный способ, так как он не зависит от таблицы Employees
+            // 3. Compare Identity GUID strings directly
+            // Most reliable method as it doesn't depend on Employees table
             return project.SupervisorUserId == currentUserId;
         }
 
@@ -208,8 +208,8 @@ namespace ProjectManager.Web.Controllers
             var projects = await _projectService.GetAllProjectAsync();
             var employees = await _employeeService.GetAllEmployeeAsync();
 
-            // Если это PM, он может назначать только тех сотрудников, которые есть в системе
-            // (Или можно отфильтровать только участников проекта)
+            // If PM, can only assign employees existing in system
+            // (Or filter only project participants)
 
             ViewBag.ProjectId = new SelectList(projects, "Id", "Name", projectId);
 
@@ -221,12 +221,12 @@ namespace ProjectManager.Web.Controllers
             ViewBag.AuthorId = new SelectList(employeeItems, "Id", "FullName");
             ViewBag.ExecutorId = new SelectList(employeeItems, "Id", "FullName");
 
-            // Статусы задач (пример)
+            // Task statuses (example)
             var statuses = new List<SelectListItem>
             {
-                new SelectListItem { Value = "0", Text = "Новая" },
-                new SelectListItem { Value = "1", Text = "В работе" },
-                new SelectListItem { Value = "2", Text = "Завершена" }
+                new SelectListItem { Value = "0", Text = "New" },
+                new SelectListItem { Value = "1", Text = "In Progress" },
+                new SelectListItem { Value = "2", Text = "Completed" }
             };
             ViewBag.Status = new SelectList(statuses, "Value", "Text");
         }
@@ -242,8 +242,8 @@ namespace ProjectManager.Web.Controllers
                 return NotFound();
             }
 
-            // Проверка прав доступа: 
-            // Если это обычный сотрудник, он должен видеть только те задачи, где он исполнитель
+            // Access control check: 
+            // If regular employee, should see only tasks where they are executor
             if (User.IsInRole("Employee"))
             {
                 var currentUserId = _userManager.GetUserId(User);
@@ -252,7 +252,7 @@ namespace ProjectManager.Web.Controllers
                     return Forbid();
                 }
             }
-            // Менеджеры и админы могут смотреть любые задачи (или добавь IsProjectSupervisor, если нужно ограничить PM-ов)
+            // Managers and admins can view any tasks (or add IsProjectSupervisor to restrict PMs)
 
             return View(task);
         }

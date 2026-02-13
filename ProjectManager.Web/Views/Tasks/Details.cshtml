@@ -39,7 +39,7 @@
         <div class="card-footer">
             <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-primary">Редактировать</a>
 
-            @* Если пришел из проекта, вернется в проект. Если из списка — в список *@
+            @* If came from project, returns to project. If from list — to list *@
             <a href="@(string.IsNullOrEmpty(ViewBag.ReturnUrl) ? Url.Action("Index") : ViewBag.ReturnUrl)" class="btn btn-secondary">
                 Назад
             </a>

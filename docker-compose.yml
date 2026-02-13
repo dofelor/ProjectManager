@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+  projectmanager.web:
+    image: ${DOCKER_REGISTRY-}projectmanagerweb
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Database=ProjectManagerDB;User Id=sa;Password=YourStrong(!)Password;TrustServerCertificate=True;
+    depends_on:
+      - db
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong(!)Password
+    ports:
+      - "1433:1433"

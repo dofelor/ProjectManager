@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations; // Нужно добавить
+using System.ComponentModel.DataAnnotations;
 
 namespace ProjectManager.Data.Entities
 {
@@ -9,7 +9,7 @@ namespace ProjectManager.Data.Entities
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(255)] // Ограничиваем длину названия проекта
+        [MaxLength(255)]
         public string Name { get; set; }
 
         [Required]
@@ -28,10 +28,10 @@ namespace ProjectManager.Data.Entities
         [DataType(DataType.Date)]
         public DateTime? EndDate { get; set; }
 
-        [Range(0, 100)] // Приоритет обычно имеет разумные границы
+        [Range(0, 100)]
         public int Priority { get; set; }
 
-        // Связи
+        // Relationships
         [Required]
         public int SupervisorId { get; set; }
         public Employee Supervisor { get; set; }

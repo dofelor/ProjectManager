@@ -6,21 +6,21 @@ namespace ProjectManager.Logic.Dtos
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Введите название задачи")]
-        [StringLength(100, ErrorMessage = "Название слишком длинное")]
+        [Required(ErrorMessage = "Enter task name")]
+        [StringLength(100, ErrorMessage = "Name is too long")]
         public string Name { get; set; } = string.Empty;
 
-        // Проект
-        [Required(ErrorMessage = "Выберите проект")]
+        // Project
+        [Required(ErrorMessage = "Select a project")]
         public int ProjectId { get; set; }
         public string? ProjectName { get; set; }
 
-        // Автор
+        // Author
         public int AuthorId { get; set; }
         public string? AuthorFullName { get; set; }
 
-        // Исполнитель
-        [Required(ErrorMessage = "Выберите исполнителя")]
+        // Executor
+        [Required(ErrorMessage = "Select an executor")]
         public int ExecutorId { get; set; }
 
         public string? ExecutorUserId { get; set; }
@@ -28,9 +28,9 @@ namespace ProjectManager.Logic.Dtos
         
         public string? ExecutorFullName { get; set; }
 
-        // Данные задачи
-        public int Status { get; set; } // Можно передавать int для выпадающего списка
-        public string? StatusDisplay { get; set; } // "ToDo", "InProgress" и т.д.
+        // Task Data
+        public int Status { get; set; } // Can pass int for dropdown list
+        public string? StatusDisplay { get; set; } // "ToDo", "InProgress" etc.
 
         public int Priority { get; set; }
         public string? Comment { get; set; }

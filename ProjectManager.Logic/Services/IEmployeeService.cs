@@ -9,10 +9,10 @@ namespace ProjectManager.Logic.Services
     public interface IEmployeeService
     {
         Task<List<EmployeeDTO>> GetAllEmployeeAsync();
-        Task<EmployeeDTO?> GetEmployeeByIdAsync(int id); // Нужно для View "Edit"
-        Task<List<EmployeeDTO>> SearchEmployeeAsync(string term); // Тот самый AJAX-поиск
+        Task<EmployeeDTO?> GetEmployeeByIdAsync(int id); // Needed for "Edit" View
+        Task<List<EmployeeDTO>> SearchEmployeeAsync(string term); // That AJAX search
         Task AddEmployeeAsync(EmployeeDTO employee);
-        Task UpdateEmployeeAsync(int id, EmployeeDTO employee); // Обычно передают саму сущность/DTO
+        Task UpdateEmployeeAsync(int id, EmployeeDTO employee); // Usually entity/DTO itself is passed
         Task<bool> DeleteEmployeeAsync(int id);
     }
 }

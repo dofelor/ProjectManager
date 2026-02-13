@@ -7,9 +7,9 @@ namespace ProjectManager.Web.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public string Password { get; set; } // Пароль, который задаст Админ
+        public string Password { get; set; } // Password set by Admin
 
-        [Required(ErrorMessage = "Выберите роль")]
-        public string Role { get; set; } // "Employee" или "ProjectManager"
+        [Required(ErrorMessage = "Select a role")]
+        public string Role { get; set; } // "Employee" or "ProjectManager"
     }
 }

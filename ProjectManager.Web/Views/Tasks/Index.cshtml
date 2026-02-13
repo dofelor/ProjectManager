@@ -18,7 +18,7 @@
                 <label class="form-label">Статус</label>
                 <select name="status" class="form-select">
                     <option value="">Все статусы</option>
-                    @* Проверяем, какой ID пришел в URL, и добавляем атрибут selected *@
+                    @* Check which ID came in the URL and add the selected attribute *@
                     <option value="0" selected="@(Context.Request.Query["status"] == "0")">ToDo</option>
                     <option value="1" selected="@(Context.Request.Query["status"] == "1")">InProgress</option>
                     <option value="2" selected="@(Context.Request.Query["status"] == "2")">Done</option>
@@ -26,8 +26,11 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Фильтровать</button>
-            <a asp-action="Create" class="btn btn-success">Создать задачу</a>
-        </form>
+            @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
+                {
+                    <a asp-action="Create" class="btn btn-success">Создать задачу</a>
+                }
+            </form>
     </div>
 </div>
 

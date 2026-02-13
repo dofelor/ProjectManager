@@ -82,17 +82,16 @@ namespace ProjectManager.Logic.Services
             await _context.SaveChangesAsync();
         }
 
-        // В EmployeeService.cs
         public async Task<bool> DeleteEmployeeAsync(int id)
         {
-            // Проверка на авторство задач (то, что упало на скрине)
+            // Check for task authorship
             bool hasTasks = await _context.ProjectTasks.AnyAsync(t => t.AuthorId == id || t.ExecutorId == id);
-            // Проверка на руководство проектами
+            // Check for project supervision
             bool hasProjects = await _context.Projects.AnyAsync(p => p.SupervisorId == id);
 
             if (hasTasks || hasProjects)
             {
-                return false; // Возвращаем false, чтобы контроллер показал TempData["Error"]
+                return false; // Return false to trigger error in controller
             }
 
             var employee = await _context.Employees.FindAsync(id);

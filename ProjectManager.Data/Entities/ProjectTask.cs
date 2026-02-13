@@ -22,15 +22,15 @@ namespace ProjectManager.Data.Entities
         public int Priority { get; set; }
         public TaskStatus Status { get; set; } = TaskStatus.ToDo;
 
-        // Связь с Проектом
+        // Project relationship
         public int ProjectId { get; set; }
         public Project? Project { get; set; }
 
-        // Автор (Сотрудник)
+        // Author (Employee)
         public int AuthorId { get; set; }
         public Employee? Author { get; set; }
 
-        // Исполнитель (Сотрудник)
+        // Executor (Employee)
         public int ExecutorId { get; set; }
         public Employee? Executor { get; set; }
     }

@@ -98,7 +98,7 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // 1. Навигация визарда
+            // 1. Wizard navigation
             $(".next-step, .prev-step").click(function() {
                 let currentStep = $(this).closest(".wizard-step");
                 let isNext = $(this).hasClass("next-step");
@@ -117,7 +117,7 @@
                 targetStep.removeClass("d-none");
             });
 
-            // 2. Поиск и выбор сотрудников
+            // 2. Search and select employees
             $("#employeeSearch").on("keyup", function() {
                 var value = $(this).val().toLowerCase();
                 $("#allEmployeesContainer .employee-item").filter(function() {
@@ -143,7 +143,7 @@
                 $(this).closest("li").remove();
             });
 
-            // 3. Drag and Drop логика
+            // 3. Drag and Drop logic
             const $dropzone = $('#dropzone');
             const $fileInput = $('#fileInput');
             const $fileList = $('#fileList');
@@ -170,8 +170,8 @@
             $dropzone.on('drop', function(e) {
                 const files = e.originalEvent.dataTransfer.files;
                 if (files.length > 0) {
-                    // Чтобы файлы ДОБАВЛЯЛИСЬ к существующим, а не заменяли их,
-                    // можно объединить списки, но для простоты оставим замену.
+                    // To ADD files to existing ones instead of replacing,
+                    // lists could be merged, but keeping replacement for simplicity.
                     updateFileList(files);
                 }
             });
@@ -180,7 +180,7 @@
                 updateFileList(this.files);
             });
 
-            // Обработчик удаления файла (ТЕПЕРЬ ВНУТРИ READY)
+            // File removal handler (NOW INSIDE READY)
             $(document).on('click', '.remove-file-btn', function() {
                 const indexToRemove = $(this).closest('li').data('index');
                 const dt = new DataTransfer();

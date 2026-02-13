@@ -1,4 +1,4 @@
-/* Убираем стандартные костыли шаблона */
+/* Remove standard template fixes */
 html {
     height: 100%;
 }
@@ -9,23 +9,23 @@ body {
     flex-direction: column;
 }
 
-/* Контент растет и толкает футер вниз */
+/* Content grows and pushes footer down */
 main {
     flex: 1 0 auto;
-    padding-bottom: 2rem; /* Чтобы контент не прилипал к футеру */
+    padding-bottom: 2rem; /* So content doesn't stick to the footer */
 }
 
-/* Футер просто стоит в конце потока, никого не перекрывая */
+/* Footer just stands at the end of the flow, not overlapping anyone */
 .footer {
     flex-shrink: 0;
     width: 100%;
     background-color: #f8f9fa;
     border-top: 1px solid #dee2e6;
     padding: 1.5rem 0;
-    position: static !important; /* Гвоздями прибиваем, чтобы не всплывал */
+    position: static !important; /* Nailing it down so it doesn't float up */
 }
 
-/* Исправляем наслоение таблиц на мобилках */
+/* Fix table overlapping on mobiles */
 .table-responsive {
     overflow-x: auto;
     background: white;

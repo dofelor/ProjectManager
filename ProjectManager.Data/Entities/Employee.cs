@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema; // ДЛЯ [ForeignKey]
-using Microsoft.AspNetCore.Identity; // ДЛЯ IdentityUser
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace ProjectManager.Data.Entities
 {
@@ -28,7 +28,7 @@ namespace ProjectManager.Data.Entities
         public List<Project> Projects { get; set; } = new();
         public List<Project> SupervisedProjects { get; set; } = new();
 
-        // Связь с Identity
+        // Identity relationship
         public string? UserId { get; set; }
 
         [ForeignKey("UserId")]

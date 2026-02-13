@@ -2,8 +2,8 @@
 
 @{
     ViewData["Title"] = "Редактирование задачи";
-    // Сотрудник может только менять статус.
-    // Админ и Проджект-менеджер (этого проекта) могут менять всё.
+    // Employee can only change status.
+    // Admin and Project Manager (of this project) can change everything.
     bool isEmployee = User.IsInRole("Employee");
 }
 
@@ -15,10 +15,10 @@
         <div class="card-body">
             <form asp-action="Edit" method="post">
                 <input type="hidden" asp-for="Id" />
-                @* Сохраняем returnUrl, чтобы вернуться туда, откуда пришли (например, из деталей проекта) *@
+                @* Save returnUrl to return where we came from (e.g., project details) *@
                 <input type="hidden" name="returnUrl" value="@ViewContext.HttpContext.Request.Query["returnUrl"]" />
 
-                @* Защита данных: если поля заблокированы (disabled), передаем их через hidden *@
+                @* Data protection: if fields are disabled, pass them via hidden *@
                 @if (isEmployee)
                 {
                     <input type="hidden" asp-for="Name" />
@@ -26,21 +26,21 @@
                     <input type="hidden" asp-for="Priority" />
                     <input type="hidden" asp-for="AuthorId" />
                     <input type="hidden" asp-for="ExecutorId" />
-                    @* Если комментарий тоже нельзя менять сотруднику: *@
+                    @* If comment also cannot be changed by employee: *@
                     <input type="hidden" asp-for="Comment" />
                 }
 
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="row">
-                    @* Название *@
+                    @* Name *@
                     <div class="col-md-12 mb-3">
                         <label asp-for="Name" class="form-label">Название задачи</label>
                         <input asp-for="Name" class="form-control" readonly="@isEmployee" />
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
 
-                    @* Проект *@
+                    @* Project *@
                     <div class="col-md-6 mb-3">
                         <label asp-for="ProjectId" class="form-label">Проект</label>
                         <select asp-for="ProjectId" class="form-select" asp-items="ViewBag.ProjectId" disabled="@isEmployee">
@@ -48,27 +48,27 @@
                         </select>
                     </div>
 
-                    @* Приоритет *@
+                    @* Priority *@
                     <div class="col-md-6 mb-3">
                         <label asp-for="Priority" class="form-label">Приоритет</label>
                         <input asp-for="Priority" type="number" class="form-control" readonly="@isEmployee" />
                     </div>
 
-                    @* Автор *@
+                    @* Author *@
                     <div class="col-md-6 mb-3">
                         <label asp-for="AuthorId" class="form-label">Автор</label>
                         <select asp-for="AuthorId" class="form-select" asp-items="ViewBag.AuthorId" disabled="@isEmployee">
                         </select>
                     </div>
 
-                    @* Исполнитель *@
+                    @* Executor *@
                     <div class="col-md-6 mb-3">
                         <label asp-for="ExecutorId" class="form-label">Исполнитель</label>
                         <select asp-for="ExecutorId" class="form-select" asp-items="ViewBag.ExecutorId" disabled="@isEmployee">
                         </select>
                     </div>
 
-                    @* СТАТУС - доступен всем *@
+                    @* STATUS - available to all *@
                     <div class="col-md-6 mb-3">
                         <label asp-for="Status" class="form-label text-primary fw-bold">Статус задачи</label>
                         <select asp-for="Status" class="form-select border-primary fw-bold">
@@ -78,7 +78,7 @@
                         </select>
                     </div>
 
-                    @* Комментарий *@
+                    @* Comment *@
                     <div class="col-md-12 mb-3">
                         <label asp-for="Comment" class="form-label">Комментарий</label>
                         <textarea asp-for="Comment" class="form-control" rows="3" readonly="@isEmployee"></textarea>

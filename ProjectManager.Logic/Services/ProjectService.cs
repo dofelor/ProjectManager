@@ -45,12 +45,12 @@ namespace ProjectManager.Logic.Services
                 Priority = p.Priority,
                 SupervisorId = p.SupervisorId,
 
-                // ВАЖНО: Маппинг UserId руководителя (из таблицы AspNetUsers через сущность Employee)
+                // Mapping Supervisor UserId (from AspNetUsers via Employee entity)
                 SupervisorUserId = p.Supervisor != null ? p.Supervisor.UserId : null,
 
                 SupervisorFullName = p.Supervisor != null
                     ? $"{p.Supervisor.LastName} {p.Supervisor.FirstName}"
-                    : "Нет руководителя",
+                    : "No supervisor",
 
                 Employees = p.Employees.Select(e => new EmployeeDTO
                 {
@@ -64,7 +64,7 @@ namespace ProjectManager.Logic.Services
 
         public async Task CreateProjectAsync(ProjectDTO dto, List<int> employeeIds)
         {
-            // Превращаем DTO в Entity
+            // Map DTO to Entity
             var project = new Project
             {
                 Name = dto.Name,
@@ -78,7 +78,7 @@ namespace ProjectManager.Logic.Services
 
 
 
-            // Привязываем команду
+            // Link team members
             if (employeeIds != null && employeeIds.Any())
             {
                 project.Employees = await _context.Employees
@@ -93,7 +93,7 @@ namespace ProjectManager.Logic.Services
         public async Task RemoveEmployeeFromProjectAsync(int projectId, int employeeId)
         {
             var project = await _context.Projects
-                .Include(p => p.Employees) // Загружаем связанные данные
+                .Include(p => p.Employees) // Load related data
                 .FirstOrDefaultAsync(p => p.Id == projectId);
 
             if (project != null)
@@ -101,8 +101,8 @@ namespace ProjectManager.Logic.Services
                 var emp = project.Employees.FirstOrDefault(e => e.Id == employeeId);
                 if (emp != null)
                 {
-                    project.Employees.Remove(emp); // Удаляем связь из промежуточной таблицы
-                    await _context.SaveChangesAsync(); // Сохраняем изменения
+                    project.Employees.Remove(emp); // Remove relationship
+                    await _context.SaveChangesAsync(); // Save changes
                 }
             }
         }
@@ -116,10 +116,10 @@ namespace ProjectManager.Logic.Services
             if (existingProject == null) return;
             if (updatedProject.EndDate < updatedProject.StartDate)
             {
-                throw new Exception("Дата окончания не может быть раньше даты начала!");
+                throw new Exception("End date cannot be earlier than start date!");
             }
 
-            // Обновляем поля
+            // Update fields
             existingProject.Name = updatedProject.Name;
             existingProject.CustomerCompany = updatedProject.CustomerCompany;
             existingProject.PerformingCompany = updatedProject.PerformingCompany;
@@ -128,7 +128,7 @@ namespace ProjectManager.Logic.Services
             existingProject.Priority = updatedProject.Priority;
             existingProject.SupervisorId = updatedProject.SupervisorId;
 
-            // Обновляем команду (без двойного SaveChanges)
+            // Update team members
             existingProject.Employees.Clear();
 
             if (employeeIds != null && employeeIds.Any())
@@ -143,7 +143,7 @@ namespace ProjectManager.Logic.Services
                 }
             }
 
-            await _context.SaveChangesAsync(); // Сохраняем всё одним махом
+            await _context.SaveChangesAsync(); // Save all changes
         }
 
         public async Task<bool> DeleteProjectAsync(int id)
@@ -176,12 +176,12 @@ namespace ProjectManager.Logic.Services
                 Priority = p.Priority,
                 SupervisorId = p.SupervisorId,
 
-                // ВАЖНО: Добавляем UserId сюда для корректной работы Details.cshtml
+                // Add UserId here for Details view
                 SupervisorUserId = p.Supervisor != null ? p.Supervisor.UserId : null,
 
                 SupervisorFullName = p.Supervisor != null
                     ? $"{p.Supervisor.LastName} {p.Supervisor.FirstName}"
-                    : "Нет руководителя",
+                    : "No supervisor",
 
                 Employees = p.Employees.Select(e => new EmployeeDTO
                 {
@@ -196,7 +196,7 @@ namespace ProjectManager.Logic.Services
 
 
 
-        // Добавь в ProjectService.cs
+
 
         public async Task AddEmployeeToProjectAsync(int projectId, int employeeId)
         {
